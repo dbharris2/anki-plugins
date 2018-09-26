@@ -186,9 +186,9 @@ def onFocusLost(flag, n, fidx):
         return flag
     fields = mw.col.models.fieldNames(n.model())
     fieldThatLostFocus = fields[fidx]
-    # Retro compatibility
     if fieldThatLostFocus not in sourceFieldToDestinationField:
         return flag
+    didAnythingChange = False
     for sourceField in sourceFieldToDestinationField:
         destinationField = sourceFieldToDestinationField[sourceField]
         if destinationField not in n:
@@ -196,17 +196,9 @@ def onFocusLost(flag, n, fidx):
         elif n[destinationField]: # dst field already filled?
             continue
         sourceFieldText = mw.col.media.strip(n[sourceField])
-        if not sourceFieldText:
-            continue
-        try:
-            # update field
-            n[destinationField] = mecab.reading(sourceFieldText)
-        except Exception as e:
-            mecab = None
-            raise
-
-    # Return flag if nothing changed?
-    return True
+        n[destinationField] = mecab.reading(sourceFieldText)
+        didAnythingChange = True
+    return True if didAnythingChange else flag
 
 # Init
 ##########################################################################
